@@ -222,6 +222,9 @@
         <div class="header">
             <h1>Kygora Images</h1>
             <p>Product Image Gallery - Background Removed & Optimized</p>
+            <!-- Updated to load from manifest.json - Cache busting v2 -->
+            <!-- Cache busted: 2025-10-01T20:47:31.973Z -->
+            <!-- Cache busted: 2025-10-01T20:46:28.090Z -->
             <div class="stats">
                 <div class="stat">
                     <div class="stat-number" id="totalImages">-</div>
@@ -269,30 +272,32 @@
         let allImages = [];
         let filteredImages = [];
         
-        // Load images by scanning the directory
+        // Load images from manifest.json - Updated for proper image loading
         async function loadImages() {
             try {
-                // Try to get a list of images from the server
-                // This will work if we have a simple directory listing endpoint
-                const response = await fetch('./images/products/');
+                // Load images from manifest.json
+                const response = await fetch('./manifest.json');
                 
                 if (!response.ok) {
-                    // If directory listing fails, we'll use a predefined list
-                    // or try to load from a simple text file
+                    console.error('Failed to load manifest.json');
                     await loadImagesFromList();
                     return;
                 }
                 
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const links = doc.querySelectorAll('a[href$=".png"]');
+                const manifest = await response.json();
                 
-                allImages = Array.from(links).map(link => ({
-                    filename: link.href.split('/').pop(),
-                    url: `./images/products/${link.href.split('/').pop()}`,
-                    size: 'Unknown'
-                }));
+                if (Array.isArray(manifest) && manifest.length > 0) {
+                    allImages = manifest.map(item => ({
+                        filename: item.filename || 'Unknown',
+                        url: item.url || `./images/products/${item.filename}`,
+                        size: item.size || 'Unknown',
+                        name: item.sku || item.name || item.filename || 'Unknown'
+                    }));
+                } else {
+                    // If manifest is empty, show empty state
+                    showEmptyState();
+                    return;
+                }
                 
                 filteredImages = [...allImages];
                 displayImages();
@@ -303,40 +308,20 @@
                 
             } catch (error) {
                 console.error('Error loading images:', error);
-                await loadImagesFromList();
+                showEmptyState();
             }
         }
         
-        // Fallback: Load images from a predefined list
-        async function loadImagesFromList() {
-            // For now, let's create a simple list of known images
-            // In a real implementation, you'd want to generate this server-side
-            const knownImages = [
-                '180860_610_R_10_BCK_C.png',
-                '180860_610_R_10_DTL.png',
-                '180860_610_R_10_FNT.png',
-                '180860_610_R_10_FNT_C.png',
-                '180860_6488-BCK.png',
-                '180860_6488-DTL6.png',
-                '180860_6488-FNT.png',
-                'SS43504-421-03.png',
-                'SS43504-421-02.png',
-                'SSFA25M156476_434_02.png',
-                'SSFA25M156476_434_01.png'
-            ];
-            
-            allImages = knownImages.map(filename => ({
-                filename,
-                url: `./images/products/${filename}`,
-                size: 'Unknown'
-            }));
-            
-            filteredImages = [...allImages];
+        // No fallback - show empty state when manifest is empty
+        function showEmptyState() {
+            allImages = [];
+            filteredImages = [];
             displayImages();
             updateStats();
             
             document.getElementById('loading').style.display = 'none';
-            document.getElementById('imageGrid').style.display = 'grid';
+            document.getElementById('imageGrid').style.display = 'none';
+            document.getElementById('noResults').style.display = 'block';
         }
         
         function displayImages() {
@@ -354,9 +339,9 @@
             
             grid.innerHTML = filteredImages.map(image => `
                 <div class="image-card" onclick="openModal('${image.url}')">
-                    <img src="${image.url}" alt="${image.filename}" loading="lazy" onerror="this.style.display='none'">
+                    <img src="${image.url}" alt="${image.name || image.filename}" loading="lazy" onerror="this.style.display='none'">
                     <div class="image-info">
-                        <div class="image-name">${image.filename}</div>
+                        <div class="image-name">${image.name || image.filename}</div>
                         <div class="image-size">${formatFileSize(image.size)}</div>
                     </div>
                 </div>
@@ -415,4 +400,3 @@
     </script>
 </body>
 </html>
-<!-- Cache busted: Wed Oct  1 21:46:37 BST 2025 -->
