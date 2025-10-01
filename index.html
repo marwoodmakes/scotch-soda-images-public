@@ -222,7 +222,6 @@
         <div class="header">
             <h1>Kygora Images</h1>
             <p>Product Image Gallery - Background Removed & Optimized</p>
-            <!-- Updated to load from manifest.json - Cache busting -->
             <div class="stats">
                 <div class="stat">
                     <div class="stat-number" id="totalImages">-</div>
@@ -270,32 +269,30 @@
         let allImages = [];
         let filteredImages = [];
         
-        // Load images from manifest.json - Updated for proper image loading
+        // Load images by scanning the directory
         async function loadImages() {
             try {
-                // Load images from manifest.json
-                const response = await fetch('./manifest.json');
+                // Try to get a list of images from the server
+                // This will work if we have a simple directory listing endpoint
+                const response = await fetch('./images/products/');
                 
                 if (!response.ok) {
-                    console.error('Failed to load manifest.json');
+                    // If directory listing fails, we'll use a predefined list
+                    // or try to load from a simple text file
                     await loadImagesFromList();
                     return;
                 }
                 
-                const manifest = await response.json();
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a[href$=".png"]');
                 
-                if (Array.isArray(manifest) && manifest.length > 0) {
-                    allImages = manifest.map(item => ({
-                        filename: item.filename || 'Unknown',
-                        url: item.url || `./images/products/${item.filename}`,
-                        size: item.size || 'Unknown',
-                        name: item.sku || item.name || item.filename || 'Unknown'
-                    }));
-                } else {
-                    // If manifest is empty, try to load from a predefined list
-                    await loadImagesFromList();
-                    return;
-                }
+                allImages = Array.from(links).map(link => ({
+                    filename: link.href.split('/').pop(),
+                    url: `./images/products/${link.href.split('/').pop()}`,
+                    size: 'Unknown'
+                }));
                 
                 filteredImages = [...allImages];
                 displayImages();
@@ -357,9 +354,9 @@
             
             grid.innerHTML = filteredImages.map(image => `
                 <div class="image-card" onclick="openModal('${image.url}')">
-                    <img src="${image.url}" alt="${image.name || image.filename}" loading="lazy" onerror="this.style.display='none'">
+                    <img src="${image.url}" alt="${image.filename}" loading="lazy" onerror="this.style.display='none'">
                     <div class="image-info">
-                        <div class="image-name">${image.name || image.filename}</div>
+                        <div class="image-name">${image.filename}</div>
                         <div class="image-size">${formatFileSize(image.size)}</div>
                     </div>
                 </div>
