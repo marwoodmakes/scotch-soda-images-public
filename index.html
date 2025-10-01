@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scotch Soda Images - Product Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        .gallery {
+            padding: 40px;
+        }
+        
+        .search-container {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .search-input {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 50px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .image-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .image-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .image-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f8f9fa;
+        }
+        
+        .image-info {
+            padding: 15px;
+        }
+        
+        .image-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .image-size {
+            color: #7f8c8d;
+            font-size: 0.8rem;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+        
+        .no-results h3 {
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        
+        .footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            color: #7f8c8d;
+            border-top: 1px solid #e1e8ed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 90%;
+            margin-top: 5%;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #bbb;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .gallery {
+                padding: 20px;
+            }
+            
+            .image-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Scotch Soda Images</h1>
+            <p>Product Image Gallery - Background Removed & Optimized</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalImages">-</div>
+                    <div class="stat-label">Total Images</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="visibleImages">-</div>
+                    <div class="stat-label">Visible</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="gallery">
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search images by name...">
+            </div>
+            
+            <div class="loading" id="loading">
+                Loading images...
+            </div>
+            
+            <div class="image-grid" id="imageGrid" style="display: none;">
+                <!-- Images will be loaded here -->
+            </div>
+            
+            <div class="no-results" id="noResults" style="display: none;">
+                <h3>No images found</h3>
+                <p>Try adjusting your search terms</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Powered by Pixian.ai Background Removal & Scotch Data Processor</p>
+            <p>Images are automatically processed and optimized for web use</p>
+        </div>
+    </div>
+    
+    <!-- Modal for image preview -->
+    <div id="imageModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="modalImage">
+    </div>
+    
+    <script>
+        let allImages = [];
+        let filteredImages = [];
+        
+        // Load images from manifest
+        async function loadImages() {
+            try {
+                const response = await fetch('./manifest.json');
+                const manifest = await response.json();
+                
+                allImages = Object.entries(manifest).map(([filename, data]) => ({
+                    filename,
+                    url: `./images/products/${filename}`,
+                    size: data.size || 'Unknown',
+                    ...data
+                }));
+                
+                filteredImages = [...allImages];
+                displayImages();
+                updateStats();
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('imageGrid').style.display = 'grid';
+            } catch (error) {
+                console.error('Error loading images:', error);
+                document.getElementById('loading').innerHTML = '<h3>Error loading images</h3><p>Please try refreshing the page</p>';
+            }
+        }
+        
+        function displayImages() {
+            const grid = document.getElementById('imageGrid');
+            const noResults = document.getElementById('noResults');
+            
+            if (filteredImages.length === 0) {
+                grid.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            noResults.style.display = 'none';
+            
+            grid.innerHTML = filteredImages.map(image => `
+                <div class="image-card" onclick="openModal('${image.url}')">
+                    <img src="${image.url}" alt="${image.filename}" loading="lazy">
+                    <div class="image-info">
+                        <div class="image-name">${image.filename}</div>
+                        <div class="image-size">${formatFileSize(image.size)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateStats() {
+            document.getElementById('totalImages').textContent = allImages.length;
+            document.getElementById('visibleImages').textContent = filteredImages.length;
+        }
+        
+        function formatFileSize(bytes) {
+            if (typeof bytes !== 'number') return 'Unknown';
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function filterImages(searchTerm) {
+            const term = searchTerm.toLowerCase();
+            filteredImages = allImages.filter(image => 
+                image.filename.toLowerCase().includes(term)
+            );
+            displayImages();
+            updateStats();
+        }
+        
+        function openModal(imageUrl) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageUrl;
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterImages(e.target.value);
+        });
+        
+        document.querySelector('.close').addEventListener('click', closeModal);
+        
+        document.getElementById('imageModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('imageModal')) {
+                closeModal();
+            }
+        });
+        
+        // Load images when page loads
+        loadImages();
+    </script>
+</body>
+</html>
