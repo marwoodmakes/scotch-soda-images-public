@@ -254,5 +254,21 @@
     "url": "https://scotch-soda-images-public.onrender.com/images/products/U9A01046T_610_BCK.png",
     "processedAt": "2025-10-01T21:31:06.974Z",
     "size": 587282
+  },
+  {
+    "sku": "Ladies - Knitwear (FA25)",
+    "originalUrl": "https://assets.unitedlegwear.com/m/286dbf4180f4f801/Hires_PNG-181502_8316-FNT.png",
+    "filename": "181502_8316-FNT.png",
+    "url": "https://scotch-soda-images-public.onrender.com/images/products/181502_8316-FNT.png",
+    "processedAt": "2025-10-01T21:37:26.966Z",
+    "size": 606449
+  },
+  {
+    "sku": "Ladies - Knitwear (FA25)_2",
+    "originalUrl": "https://assets.unitedlegwear.com/m/60481c1ef954c22c/Hires_PNG-181502_8316-BCK.png",
+    "filename": "181502_8316-BCK.png",
+    "url": "https://scotch-soda-images-public.onrender.com/images/products/181502_8316-BCK.png",
+    "processedAt": "2025-10-01T21:37:28.631Z",
+    "size": 600958
   }
 ]
